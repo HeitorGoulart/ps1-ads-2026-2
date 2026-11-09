@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -42,7 +43,7 @@ public class CarController {
     // }
 
     @PostMapping
-    public ResponseEntity<Car> create(@RequestBody Car car) {
+    public ResponseEntity<Car> create(@Valid @RequestBody Car car) {
         Car savedCar = service.create(car);
 
         return ResponseEntity
@@ -91,7 +92,7 @@ public class CarController {
     @PutMapping("/{id}")
     public ResponseEntity<Car> update(
             @PathVariable Long id,
-            @RequestBody Car car) {
+            @Valid @RequestBody Car car) {
 
         if (!service.existsById(id)) {
             return ResponseEntity.notFound().build();
