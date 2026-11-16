@@ -26,28 +26,37 @@ import org.springframework.web.bind.annotation.RestController;
 
 import br.edu.fatecfranca.api.entities.User;
 import br.edu.fatecfranca.api.services.UserService;
+import br.edu.fatecfranca.api.dtos.LoginResponse;
+import br.edu.fatecfranca.api.services.TokenService;
+
 
 @RestController
 @RequestMapping("/users")
 public class UserController {
 
-    private final UserService service;
+    
 
-    public UserController(UserService service) {
+    private final UserService service;
+    private final TokenService tokenService;
+
+    public UserController(UserService service, TokenService tokenService) {
         this.service = service;
+        this.tokenService = tokenService;
     }
 
     @PostMapping("/login")
-   public ResponseEntity<UserResponse> login(
+   public ResponseEntity<LoginResponse> login(
            @Valid @RequestBody LoginRequest request) {
 
 
-       return service.authenticate(request)
-               .map(UserResponse::new)
-               .map(ResponseEntity::ok)
-               .orElseGet(() -> ResponseEntity
-                       .status(HttpStatus.UNAUTHORIZED)
-                       .build());
+         return service.authenticate(request)
+                .map(user -> {
+                     String token = tokenService.generate(user);
+                     UserResponse userResponse = new UserResponse(user);
+                     return ResponseEntity.ok(new LoginResponse(token, userResponse));
+                })
+                .orElse(ResponseEntity.status(HttpStatus.UNAUTHORIZED).build());
+
    }
 
 
